@@ -297,15 +297,43 @@ def test_extractor_missing_required_field_handling():
     assert any("candidate_name" in err["field"] for err in res.validation_errors)
 
 
-def test_extractor_missing_api_key_handling():
+def test_extractor_missing_api_key_handling(monkeypatch):
     """Verify APIConnectionError is caught and returned cleanly when no key is present."""
-    # Ensure no environment keys interfere for this test
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     res = extract_structured_json(
         text="Sample text",
         document_type="resume",
         provider="gemini",
-        api_key="",  # explicitly empty
+        api_key=None,
     )
-    # If environment variable is absent or key is empty, it reports connection failure gracefully
-    if not res.success:
-        assert "API Key" in (res.error_message or "") or "Gemini" in (res.error_message or "")
+    assert res.success is False
+    assert "Gemini API Key missing" in (res.error_message or "")
+
+
+def test_extractor_gemini_503_fallback(monkeypatch):
+    """Verify that when a Gemini model raises 503 UNAVAILABLE, the pipeline falls back to the next candidate model."""
+    from unittest.mock import MagicMock
+    import google.genai
+
+    mock_client = MagicMock()
+    def mock_generate_content(model, contents, config):
+        if model == "gemini-3.5-flash":
+            raise Exception("503 UNAVAILABLE. This model is currently experiencing high demand.")
+        res = MagicMock()
+        res.text = '{"candidate_name": "Test Candidate", "skills": ["Python"]}'
+        return res
+
+    mock_client.models.generate_content.side_effect = mock_generate_content
+    monkeypatch.setattr(google.genai, "Client", lambda api_key: mock_client)
+
+    raw, prov, used_model = call_llm(
+        system_prompt="system",
+        user_prompt="user",
+        provider="gemini",
+        api_key="fake-key",
+        model_name="gemini-3.5-flash",
+    )
+    assert prov == "gemini"
+    assert used_model != "gemini-3.5-flash"
+    assert "candidate_name" in raw

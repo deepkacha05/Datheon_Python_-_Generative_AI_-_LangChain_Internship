@@ -230,15 +230,22 @@ def main():
     if provider_choice == "Google Gemini":
         provider_code = "gemini"
         gemini_model_options = [
-            "gemini-3.5-flash",
-            "gemini-3.1-flash-lite",
-            "gemini-flash-latest",
             "gemini-2.5-flash-lite",
+            "gemini-3.5-flash-lite",
+            "gemini-flash-latest",
+            "gemini-3.5-flash",
+            "gemini-3.8-flash",
             "Custom Model",
         ]
-        selected_model = st.sidebar.selectbox("Gemini Model", options=gemini_model_options, index=0)
+        env_gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+        default_gemini_index = (
+            gemini_model_options.index(env_gemini_model)
+            if env_gemini_model in gemini_model_options
+            else 0
+        )
+        selected_model = st.sidebar.selectbox("Gemini Model", options=gemini_model_options, index=default_gemini_index)
         if selected_model == "Custom Model":
-            model_name = st.sidebar.text_input("Enter Custom Model Name", value="gemini-3.5-flash")
+            model_name = st.sidebar.text_input("Enter Custom Model Name", value="gemini-2.5-flash-lite")
         else:
             model_name = selected_model
 
@@ -439,6 +446,11 @@ def main():
                 f"✅ **Extraction & Schema Validation Succeeded!** "
                 f"Provider: `{result.provider_used}` | Model: `{result.model_used}` | Latency: `{result.execution_time_seconds:.3f}s`"
             )
+            if provider_code == "gemini" and model_name and result.model_used != model_name:
+                st.info(
+                    f"ℹ️ **Automatic Model Fallback:** Requested model `{model_name}` experienced temporary high demand (503). "
+                    f"The pipeline automatically succeeded using high-availability fallback model `{result.model_used}`."
+                )
 
             tab_viz, tab_json, tab_schema, tab_raw = st.tabs([
                 "📊 Structured Visual View",
@@ -498,6 +510,7 @@ def main():
             # Hinglish troubleshooting tips
             st.info(
                 "💡 **Mentor Troubleshooting Tips (Hinglish):**\n"
+                "- Agar **503 UNAVAILABLE (High Demand)** error aaye, to dropdown me **`gemini-2.5-flash-lite`** select karein ya kuch der baad try karein.\n"
                 "- Agar **API Connection Error** hai, to `.env` file me `GEMINI_API_KEY` verify karein ya sidebar me paste karein.\n"
                 "- Agar bina API key ke instant test karna hai, sidebar me **'Offline Mock Mode'** select karein.\n"
                 "- Agar **JSONParsingError** hai, to sanitization engine raw response se markdown fences (````json`) aur extra text auto-clean karta hai."

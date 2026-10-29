@@ -101,7 +101,7 @@ OPENAI_API_KEY=sk-...your_openai_key
 
 # Default Settings
 DEFAULT_LLM_PROVIDER=gemini
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.5-flash-lite
 OPENAI_MODEL=gpt-4o-mini
 ```
 
@@ -227,6 +227,7 @@ pytest tests/test_task1.py -v
 - `test_extractor_resume_mock_success`: Full end-to-end extraction with mock LLM.
 - `test_extractor_missing_required_field_handling`: Tests graceful error reporting for missing fields.
 - `test_extractor_missing_api_key_handling`: Tests clean handling of missing or invalid API keys.
+- `test_extractor_gemini_503_fallback`: Verifies automated resilience and candidate fallback when a model encounters 503 high demand.
 
 ---
 

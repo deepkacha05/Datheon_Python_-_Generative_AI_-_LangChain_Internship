@@ -190,7 +190,7 @@ def call_llm(
                 "or obtain a free key at https://aistudio.google.com/"
             )
 
-        resolved_model = model_name or os.getenv("GEMINI_MODEL") or "gemini-3.5-flash"
+        resolved_model = model_name or os.getenv("GEMINI_MODEL") or "gemini-2.5-flash-lite"
 
         try:
             from google import genai
@@ -202,9 +202,9 @@ def call_llm(
                 temperature=temperature,
                 response_mime_type="application/json",
             )
-            # Fallback candidates prioritizing verified active models
+            # Fallback candidates prioritizing verified active models with high availability
             models_to_try = [resolved_model]
-            for cand in ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3.6-flash"]:
+            for cand in ["gemini-2.5-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest", "gemini-3.5-flash", "gemini-3.8-flash"]:
                 if cand not in models_to_try:
                     models_to_try.append(cand)
 
@@ -220,17 +220,17 @@ def call_llm(
                         return response.text, "gemini", cand_model
                 except Exception as exc:
                     err_msg = str(exc)
-                    if "404" in err_msg or "NOT_FOUND" in err_msg or "not supported for generateContent" in err_msg:
-                        last_error = exc
-                        continue
-                    if "API_KEY_INVALID" in err_msg or "403" in err_msg:
+                    # Unrecoverable authentication/permission errors should fail immediately
+                    if "API_KEY_INVALID" in err_msg or "403" in err_msg or "PERMISSION_DENIED" in err_msg:
                         raise APIConnectionError("Google Gemini API Key is invalid or unauthorized.") from exc
-                    if "RESOURCE_EXHAUSTED" in err_msg or "429" in err_msg:
-                        raise APIConnectionError("Google Gemini API rate limit or quota exceeded.") from exc
-                    raise APIConnectionError(f"Google Gemini API error: {err_msg}") from exc
+
+                    # Recoverable errors (503 UNAVAILABLE, 429 RESOURCE_EXHAUSTED, 500, 404 NOT_FOUND):
+                    # attempt next candidate model in fallback chain
+                    last_error = exc
+                    continue
 
             if last_error:
-                raise APIConnectionError(f"Google Gemini API error: {str(last_error)}") from last_error
+                raise APIConnectionError(f"Google Gemini API error (all model fallbacks exhausted): {str(last_error)}") from last_error
         except (APIConnectionError, ValueError):
             raise
         except Exception as exc:
