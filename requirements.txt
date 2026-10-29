@@ -1,0 +1,19 @@
+# ========================================================
+# Datheon Internship - Core Dependencies
+# Python 3.10+ / 3.11 / 3.12 / 3.13 Compatible
+# ========================================================
+
+# Pydantic & Data Validation
+pydantic>=2.7.0
+python-dotenv>=1.0.0
+
+# LLM Providers (Task 1, 2, 3, 4)
+google-genai>=0.1.0
+openai>=1.30.0
+
+# Interactive Frontend (Streamlit)
+streamlit>=1.35.0
+pandas>=2.0.0
+
+# Testing & Quality Assurance
+pytest>=8.0.0

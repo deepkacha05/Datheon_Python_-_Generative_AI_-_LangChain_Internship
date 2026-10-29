@@ -1,0 +1,112 @@
+# Datheon Python + Generative AI & LangChain Internship
+
+![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)
+![Pydantic](https://img.shields.io/badge/Pydantic-v2.14-green.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-v1.66-red.svg)
+![License](https://img.shields.io/badge/License-MIT-purple.svg)
+
+This repository contains the complete technical deliverables for the **Datheon Python + Generative AI & LangChain Internship**. It demonstrates production-ready generative AI engineering practices, including structured LLM outputs, Retrieval-Augmented Generation (RAG) with vector databases, autonomous tool-calling agents, and full-stack interactive Streamlit applications.
+
+---
+
+## 📂 Repository Structure
+
+```
+Datheon_Internship/
+├── .env.example                     # Template environment variables (never commit real secrets)
+├── .gitignore                       # Ignored paths: .venv, .env, __pycache__, vector databases
+├── requirements.txt                 # Unified dependencies list
+├── README.md                        # Master repository overview and setup guide
+│
+├── task1_json_extractor/            # [COMPLETED] Task 1: Structured LLM Prompt Pipeline & JSON Extractor
+│   ├── app.py                       # Streamlit interactive application & CLI runner
+│   ├── schemas.py                   # Pydantic v2 validation models (Resume & Invoice)
+│   ├── prompts.py                   # Parameterized, reusable prompt templates
+│   ├── extractor.py                 # Core extraction engine with dual LLM & repair pipeline
+│   ├── sample_data.py               # Realistic sample inputs and malformed test payloads
+│   └── README.md                    # Detailed task documentation, architecture & examples
+│
+├── task2_rag_qa/                    # [UPCOMING] Task 2: Document Q&A Assistant with RAG & Embeddings
+│   ├── app.py
+│   ├── rag_pipeline.py
+│   ├── sample_documents/
+│   └── README.md
+│
+├── task3_ai_agent/                  # [UPCOMING] Task 3: Multi-Tool Autonomous AI Agent
+│   ├── app.py
+│   ├── agent.py
+│   ├── tools.py
+│   └── README.md
+│
+├── task4_streamlit_chatbot/         # [UPCOMING] Task 4: Interactive Full-Stack AI Chatbot with Streamlit
+│   ├── app.py
+│   └── README.md
+│
+└── tests/                           # Comprehensive test suite across all tasks
+    ├── __init__.py
+    └── test_task1.py                # Unit & mock pipeline tests for Task 1 (15/15 passed)
+```
+
+---
+
+## 🎯 Internship Projects Overview
+
+| Task | Module | Description | Status |
+|---|---|---|---|
+| **Task 1** | [`task1_json_extractor`](file:///d:/Projects/Datheon_Internship/task1_json_extractor/) | Structured LLM Prompt Pipeline & JSON Extractor using Pydantic v2 & Google Gemini / OpenAI | **Completed & Verified** ✅ |
+| **Task 2** | `task2_rag_qa` | Document Q&A Assistant with RAG, chunking, and vector database embeddings | Planned ⏳ |
+| **Task 3** | `task3_ai_agent` | Multi-Tool Autonomous AI Agent with LangChain, safe math, and web search | Planned ⏳ |
+| **Task 4** | `task4_streamlit_chatbot` | Interactive Full-Stack AI Chatbot with Streamlit, memory, and streaming | Planned ⏳ |
+
+---
+
+## ⚡ Quick Start Guide
+
+### 1. Environment Setup
+```bash
+# Clone the repository
+git clone https://github.com/your-username/Datheon_Internship.git
+cd Datheon_Internship
+
+# Create and activate virtual environment
+python -m venv .venv
+# On Windows:
+.venv\Scripts\Activate.ps1
+# On Linux/macOS:
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment Variables
+Copy `.env.example` to `.env` and insert your API keys:
+```bash
+cp .env.example .env
+```
+Supported keys:
+- `GEMINI_API_KEY`: Get a free key from [Google AI Studio](https://aistudio.google.com/)
+- `OPENAI_API_KEY`: Optional alternative from [OpenAI Platform](https://platform.openai.com/)
+
+### 3. Run Task 1 (Structured JSON Extractor)
+```bash
+# Option A: Interactive Streamlit UI
+streamlit run task1_json_extractor/app.py
+
+# Option B: Terminal CLI Mode (Uses Mock LLM mode for instant testing)
+python task1_json_extractor/app.py --cli
+```
+
+### 4. Run Test Suite
+```bash
+pytest tests/ -v
+```
+
+---
+
+## 🛡️ Engineering Best Practices Followed
+- **No Hardcoded Secrets:** All API keys loaded dynamically from `.env` via `python-dotenv`.
+- **Strict Pydantic Validation:** Models enforce constraints, types, and automated numeric/currency coercion.
+- **Resilient Parsing:** Trailing commas, markdown fences, and preambles are automatically repaired.
+- **Offline / Mock Mode:** Built-in mock evaluator ensures anyone can test without spending money or needing API keys.
+- **Modular Design:** Clear separation of concerns between `schemas.py`, `prompts.py`, `extractor.py`, and `app.py`.
