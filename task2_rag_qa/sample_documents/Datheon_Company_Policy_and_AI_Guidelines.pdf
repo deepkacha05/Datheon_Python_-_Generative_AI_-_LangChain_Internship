@@ -1,0 +1,161 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 3 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 1122 >>
+stream
+BT
+/F1 12 Tf
+50 740 Td
+16 TL
+(DATHEON TECH SOLUTIONS - EMPLOYEE HANDBOOK & COMPANY POLICIES) Tj
+T*
+(Document Ref: POL-2025-V2.1 | Effective Date: January 1, 2025) Tj
+T*
+() Tj
+T*
+(SECTION 1: ORGANIZATIONAL MISSION & WORKING HOURS) Tj
+T*
+(Datheon Tech Solutions is a premier artificial intelligence research and consulting firm) Tj
+T*
+(specializing in enterprise LangChain agents, high-throughput RAG systems, and structured LLM extraction.) Tj
+T*
+() Tj
+T*
+(1.1 Standard Working Hours:) Tj
+T*
+(- Official office hours are 9:30 AM to 6:30 PM Indian Standard Time \(IST\), Monday through Friday.) Tj
+T*
+(- Core synchronous team collaboration hours are 11:00 AM to 4:00 PM IST.) Tj
+T*
+(- All team members are expected to be reachable via Slack during core collaboration hours.) Tj
+T*
+() Tj
+T*
+(1.2 Annual Paid Time Off \(PTO\):) Tj
+T*
+(- Full-time engineers receive 24 paid vacation days annually, accrued monthly at 2 days per month.) Tj
+T*
+(- Employees receive 10 paid casual/medical sick leaves per calendar year.) Tj
+T*
+(- National and regional holidays are published in December for the subsequent calendar year.) Tj
+T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 3 0 R >> >> /MediaBox [0 0 612 792] /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 1151 >>
+stream
+BT
+/F1 12 Tf
+50 740 Td
+16 TL
+(SECTION 2: HYBRID WORK & EXPENSE REIMBURSEMENT POLICY) Tj
+T*
+() Tj
+T*
+(2.1 Hybrid Remote Work Model:) Tj
+T*
+(- Datheon operates on a flexible hybrid model allowing engineers to work remotely up to 3 days per week.) Tj
+T*
+(- Mandatory in-office collaboration days are Tuesday and Thursday for sprint planning and demos.) Tj
+T*
+(- Fully remote work arrangements require written approval from the Engineering Director.) Tj
+T*
+() Tj
+T*
+(2.2 Ergonomic Home Office Equipment Stipend:) Tj
+T*
+(- New full-time hires are eligible for a one-time home office tech stipend of $800 \(or INR 65,000\).) Tj
+T*
+(- Eligible expenses include ergonomic monitors, standing desk converters, noise-canceling headsets, and chairs.) Tj
+T*
+(- Receipts must be submitted through the Datheon HR Portal within 60 days of employment.) Tj
+T*
+() Tj
+T*
+(2.3 Business Travel & Meal Per Diem:) Tj
+T*
+(- Approved domestic travel flights must be booked in economy class.) Tj
+T*
+(- The maximum allowable daily meal per diem is $75 \(or INR 4,500\) per day.) Tj
+T*
+(- Itemized tax invoices must be submitted with expense claims for audit compliance.) Tj
+T*
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 3 0 R >> >> /MediaBox [0 0 612 792] /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 1208 >>
+stream
+BT
+/F1 12 Tf
+50 740 Td
+16 TL
+(SECTION 3: GENERATIVE AI SECURITY & INTELLECTUAL PROPERTY STANDARDS) Tj
+T*
+() Tj
+T*
+(3.1 Safe Handling of Client Proprietary Data:) Tj
+T*
+(- Engineers must never paste unredacted client intellectual property, PII, or credentials into public LLM portals.) Tj
+T*
+(- Enterprise zero-data-retention APIs \(Google Cloud Vertex AI, Azure OpenAI, enterprise Gemini\) are approved.) Tj
+T*
+(- All documents indexed in vector databases \(such as ChromaDB\) must be purged upon project decommissioning.) Tj
+T*
+() Tj
+T*
+(3.2 API Key Governance:) Tj
+T*
+(- API credentials \(including GEMINI_API_KEY, OPENAI_API_KEY, and TAVILY_API_KEY\) must strictly reside in local .env files.) Tj
+T*
+(- Hardcoding secrets or checking .env files into GitHub repositories is a critical security violation.) Tj
+T*
+() Tj
+T*
+(3.3 Verification & Hallucination Mitigation:) Tj
+T*
+(- Any production LLM workflow must implement context grounding and output validation \(e.g. Pydantic v2 schemas\).) Tj
+T*
+(- When a document Q&A assistant cannot find supporting facts in uploaded documents, it must explicitly state) Tj
+T*
+(  that the information was not found rather than hallucinating plausible answers.) Tj
+T*
+ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000133 00000 n 
+0000000203 00000 n 
+0000000329 00000 n 
+0000001503 00000 n 
+0000001629 00000 n 
+0000002832 00000 n 
+0000002958 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+4218
+%%EOF

@@ -26,11 +26,15 @@ Datheon_Internship/
 │   ├── sample_data.py               # Realistic sample inputs and malformed test payloads
 │   └── README.md                    # Detailed task documentation, architecture & examples
 │
-├── task2_rag_qa/                    # [UPCOMING] Task 2: Document Q&A Assistant with RAG & Embeddings
-│   ├── app.py
-│   ├── rag_pipeline.py
-│   ├── sample_documents/
-│   └── README.md
+├── task2_rag_qa/                    # [COMPLETED] Task 2: Document Q&A Assistant with RAG & Embeddings
+│   ├── app.py                       # Streamlit interactive application & CLI runner
+│   ├── pdf_loader.py                # Page-level PDF text extraction & OCR diagnostics
+│   ├── text_splitter.py             # LangChain RecursiveCharacterTextSplitter chunking
+│   ├── embeddings.py                # Google Gemini, OpenAI & Mock vector embeddings
+│   ├── vector_store.py              # ChromaDB vector store collection management
+│   ├── rag_pipeline.py              # Grounded Q&A pipeline with physical page citations
+│   ├── sample_documents/            # Realistic sample policy PDF generator
+│   └── README.md                    # Detailed task documentation, architecture & examples
 │
 ├── task3_ai_agent/                  # [UPCOMING] Task 3: Multi-Tool Autonomous AI Agent
 │   ├── app.py
@@ -44,7 +48,8 @@ Datheon_Internship/
 │
 └── tests/                           # Comprehensive test suite across all tasks
     ├── __init__.py
-    └── test_task1.py                # Unit & mock pipeline tests for Task 1 (16/16 passed)
+    ├── test_task1.py                # Unit & mock pipeline tests for Task 1 (16/16 passed)
+    └── test_task2.py                # Unit & mock pipeline tests for Task 2 (12/12 passed)
 ```
 
 ---
@@ -54,7 +59,7 @@ Datheon_Internship/
 | Task | Module | Description | Status |
 |---|---|---|---|
 | **Task 1** | [`task1_json_extractor`](file:///d:/Projects/Datheon_Internship/task1_json_extractor/) | Structured LLM Prompt Pipeline & JSON Extractor using Pydantic v2 & Google Gemini / OpenAI | **Completed & Verified** ✅ |
-| **Task 2** | `task2_rag_qa` | Document Q&A Assistant with RAG, chunking, and vector database embeddings | Planned ⏳ |
+| **Task 2** | [`task2_rag_qa`](file:///d:/Projects/Datheon_Internship/task2_rag_qa/) | Document Q&A Assistant with RAG, LangChain chunking, ChromaDB, and strict page citations | **Completed & Verified** ✅ |
 | **Task 3** | `task3_ai_agent` | Multi-Tool Autonomous AI Agent with LangChain, safe math, and web search | Planned ⏳ |
 | **Task 4** | `task4_streamlit_chatbot` | Interactive Full-Stack AI Chatbot with Streamlit, memory, and streaming | Planned ⏳ |
 
@@ -97,9 +102,18 @@ streamlit run task1_json_extractor/app.py
 python task1_json_extractor/app.py --cli
 ```
 
-### 4. Run Test Suite
+### 4. Run Task 2 (Document Q&A Assistant with RAG & Vector Embeddings)
 ```bash
-pytest tests/ -v
+# Option A: Interactive Streamlit UI
+streamlit run task2_rag_qa/app.py
+
+# Option B: Terminal CLI Mode (Uses Mock LLM mode for instant testing)
+python task2_rag_qa/app.py --cli
+```
+
+### 5. Run Test Suite (All 28 Unit Tests)
+```bash
+pytest -v
 ```
 
 ---
@@ -108,5 +122,7 @@ pytest tests/ -v
 - **No Hardcoded Secrets:** All API keys loaded dynamically from `.env` via `python-dotenv`.
 - **Strict Pydantic Validation:** Models enforce constraints, types, and automated numeric/currency coercion.
 - **Resilient Parsing:** Trailing commas, markdown fences, and preambles are automatically repaired.
+- **Physical Page Citations & Grounding:** RAG answers are strictly grounded in retrieved document chunks with source filename and physical page numbers.
+- **Scanned PDF Diagnostics:** Accurately flags image-only PDFs and guides users on OCR requirements instead of hallucinating extracted text.
 - **Offline / Mock Mode:** Built-in mock evaluator ensures anyone can test without spending money or needing API keys.
-- **Modular Design:** Clear separation of concerns between `schemas.py`, `prompts.py`, `extractor.py`, and `app.py`.
+- **Modular Design:** Clear separation of concerns between extractors, splitters, vector stores, and UI dashboards.
