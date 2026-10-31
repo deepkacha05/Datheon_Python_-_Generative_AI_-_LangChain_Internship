@@ -122,14 +122,27 @@ class WebSearchTool(BaseAgentTool):
         try:
             with urllib.request.urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read().decode())
-                for item in data.get("query", {}).get("search", []):
+                items = data.get("query", {}).get("search", [])
+                for idx, item in enumerate(items):
                     raw_snippet = re.sub(r"<[^>]+>", "", item.get("snippet", ""))
                     clean_snippet = sanitize_web_snippet(raw_snippet)
                     title = item.get("title", "")
+                    if idx == 0 and title:
+                        try:
+                            t_enc = urllib.parse.quote(title.replace(" ", "_"))
+                            intro_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{t_enc}"
+                            intro_req = urllib.request.Request(intro_url, headers={"User-Agent": "DatheonInternshipAgent/1.0"})
+                            with urllib.request.urlopen(intro_req, timeout=4) as i_resp:
+                                i_data = json.loads(i_resp.read().decode())
+                                extract = i_data.get("extract", "")
+                                if extract:
+                                    clean_snippet = sanitize_web_snippet(extract)
+                        except Exception:
+                            pass
                     results.append({
                         "title": title,
                         "snippet": clean_snippet,
-                        "url": f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title)}",
+                        "url": f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title.replace(' ', '_'))}",
                     })
         except Exception:
             pass
