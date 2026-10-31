@@ -137,3 +137,4 @@ def generate_sample_policy_pdf(output_path: str = "task2_rag_qa/sample_documents
 if __name__ == "__main__":
     out = generate_sample_policy_pdf()
     print(f"Sample PDF successfully generated at: {out}")
+

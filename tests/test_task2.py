@@ -259,3 +259,4 @@ def test_rag_pipeline_empty_store():
     pipeline = RAGPipeline(provider="mock", embedder=MockEmbedder())
     resp = pipeline.query(question="What are the working hours?")
     assert "upload" in resp.answer.lower() or "no documents" in resp.answer.lower()
+

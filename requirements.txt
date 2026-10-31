@@ -20,5 +20,9 @@ pypdf>=5.0.0
 langchain-text-splitters>=0.2.0
 chromadb>=0.5.0
 
+# Multi-Tool Autonomous Agent (Task 3)
+duckduckgo_search>=7.0.0
+tavily-python>=0.5.0
+
 # Testing & Quality Assurance
 pytest>=8.0.0

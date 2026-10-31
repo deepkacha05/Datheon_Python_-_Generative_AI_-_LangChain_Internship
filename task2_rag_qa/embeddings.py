@@ -262,3 +262,4 @@ def get_embedder(
         raise ValueError(
             f"Unsupported embedding provider: '{provider}'. Supported options: 'gemini', 'openai', 'mock'."
         )
+

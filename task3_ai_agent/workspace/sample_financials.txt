@@ -1,0 +1,29 @@
+DATHEON TECH SOLUTIONS - QUARTERLY FINANCIAL METRICS (2024-2025)
+Document ID: FIN-2025-QTR-REPORT
+
+--- QUARTERLY REVENUE AND OPERATING EXPENSES ---
+Q1 2024:
+- Gross Revenue: $150,000
+- Operating Expenses: $95,000
+- Net Profit: $55,000
+
+Q2 2024:
+- Gross Revenue: $225,000
+- Operating Expenses: $130,000
+- Net Profit: $95,000
+
+Q3 2024:
+- Gross Revenue: $310,000
+- Operating Expenses: $180,000
+- Net Profit: $130,000
+
+Q4 2024 (Projected):
+- Gross Revenue: $420,000
+- Operating Expenses: $240,000
+- Net Profit: $180,000
+
+--- KEY RATIOS & TARGETS ---
+Target Annual Gross Margin: >= 60%
+Current Full-Time Engineering Headcount: 24
+Approved Bonus Pool: 15% of annual net profit
+

@@ -36,11 +36,16 @@ Datheon_Internship/
 │   ├── sample_documents/            # Realistic sample policy PDF generator
 │   └── README.md                    # Detailed task documentation, architecture & examples
 │
-├── task3_ai_agent/                  # [UPCOMING] Task 3: Multi-Tool Autonomous AI Agent
-│   ├── app.py
-│   ├── agent.py
-│   ├── tools.py
-│   └── README.md
+├── task3_ai_agent/                  # [COMPLETED] Task 3: Multi-Tool Autonomous AI Agent
+│   ├── app.py                       # Streamlit interactive application & CLI runner
+│   ├── agent.py                     # Autonomous ReAct agent engine with tool calling
+│   ├── tools/                       # Tool implementations & Pydantic schemas
+│   │   ├── base.py                  # Standard BaseAgentTool & ToolResult
+│   │   ├── calculator.py            # Restricted AST safe arithmetic evaluator
+│   │   ├── file_reader.py           # Sandboxed workspace file reader with path containment
+│   │   └── web_search.py            # Tavily / DuckDuckGo web search integration
+│   ├── workspace/                   # Designated sandbox folder for readable documents
+│   └── README.md                    # Detailed architectural docs, security & examples
 │
 ├── task4_streamlit_chatbot/         # [UPCOMING] Task 4: Interactive Full-Stack AI Chatbot with Streamlit
 │   ├── app.py
@@ -49,7 +54,8 @@ Datheon_Internship/
 └── tests/                           # Comprehensive test suite across all tasks
     ├── __init__.py
     ├── test_task1.py                # Unit & mock pipeline tests for Task 1 (16/16 passed)
-    └── test_task2.py                # Unit & mock pipeline tests for Task 2 (12/12 passed)
+    ├── test_task2.py                # Unit & mock pipeline tests for Task 2 (12/12 passed)
+    └── test_task3.py                # Unit & mock pipeline tests for Task 3 (15/15 passed)
 ```
 
 ---
@@ -60,7 +66,7 @@ Datheon_Internship/
 |---|---|---|---|
 | **Task 1** | [`task1_json_extractor`](file:///d:/Projects/Datheon_Internship/task1_json_extractor/) | Structured LLM Prompt Pipeline & JSON Extractor using Pydantic v2 & Google Gemini / OpenAI | **Completed & Verified** ✅ |
 | **Task 2** | [`task2_rag_qa`](file:///d:/Projects/Datheon_Internship/task2_rag_qa/) | Document Q&A Assistant with RAG, LangChain chunking, ChromaDB, and strict page citations | **Completed & Verified** ✅ |
-| **Task 3** | `task3_ai_agent` | Multi-Tool Autonomous AI Agent with LangChain, safe math, and web search | Planned ⏳ |
+| **Task 3** | [`task3_ai_agent`](file:///d:/Projects/Datheon_Internship/task3_ai_agent/) | Multi-Tool Autonomous AI Agent with LangChain, safe AST math, and sandboxed file reader | **Completed & Verified** ✅ |
 | **Task 4** | `task4_streamlit_chatbot` | Interactive Full-Stack AI Chatbot with Streamlit, memory, and streaming | Planned ⏳ |
 
 ---
@@ -111,7 +117,16 @@ streamlit run task2_rag_qa/app.py
 python task2_rag_qa/app.py --cli
 ```
 
-### 5. Run Test Suite (All 28 Unit Tests)
+### 5. Run Task 3 (Multi-Tool Autonomous AI Agent)
+```bash
+# Option A: Interactive Streamlit UI
+streamlit run task3_ai_agent/app.py
+
+# Option B: Terminal CLI Mode (Uses Mock LLM mode for instant testing)
+python task3_ai_agent/app.py --cli
+```
+
+### 6. Run Test Suite (All 43 Unit Tests)
 ```bash
 pytest -v
 ```
@@ -124,5 +139,7 @@ pytest -v
 - **Resilient Parsing:** Trailing commas, markdown fences, and preambles are automatically repaired.
 - **Physical Page Citations & Grounding:** RAG answers are strictly grounded in retrieved document chunks with source filename and physical page numbers.
 - **Scanned PDF Diagnostics:** Accurately flags image-only PDFs and guides users on OCR requirements instead of hallucinating extracted text.
+- **Sandboxed Agent Tools:** Safe AST calculator (zero `eval()`/`exec()`), strict path traversal prevention, and secret masking.
+- **Transparent Execution Trace:** Full public audit log of tool names, sanitized inputs, and summarized observations without exposing internal private thoughts or credentials.
 - **Offline / Mock Mode:** Built-in mock evaluator ensures anyone can test without spending money or needing API keys.
-- **Modular Design:** Clear separation of concerns between extractors, splitters, vector stores, and UI dashboards.
+- **Modular Design:** Clear separation of concerns between extractors, splitters, vector stores, tools, agents, and UI dashboards.
