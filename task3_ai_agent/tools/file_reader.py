@@ -80,7 +80,21 @@ class WorkspaceFileReaderTool(BaseAgentTool):
         return sorted(files)
 
     def run(self, filename: str) -> ToolResult:
-        clean_name = filename.strip()
+        # Resilient argument unwrapping for quotes, backticks, or JSON strings
+        clean_name = str(filename).strip(" \t\n\r\"'`")
+
+        if "filename" in clean_name and ("{" in clean_name or ":" in clean_name):
+            try:
+                import json
+                data = json.loads(clean_name)
+                if isinstance(data, dict) and "filename" in data:
+                    clean_name = str(data["filename"]).strip(" \t\n\r\"'`")
+            except Exception:
+                import re
+                match = re.search(r"['\"]filename['\"]\s*:\s*['\"]([^'\"\}\n\r`]+)['\"]", clean_name)
+                if match:
+                    clean_name = match.group(1).strip(" \t\n\r\"'`")
+
         if not clean_name:
             return ToolResult(
                 success=False,

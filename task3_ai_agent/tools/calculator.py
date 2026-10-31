@@ -119,7 +119,19 @@ def safe_calculate(expression: str) -> float:
     Raises:
         ValueError, SyntaxError, ZeroDivisionError on illegal syntax or operations.
     """
-    clean_expr = expression.strip()
+    clean_expr = str(expression).strip(" \t\n\r\"'`")
+    if "expression" in clean_expr and ("{" in clean_expr or ":" in clean_expr):
+        try:
+            import json
+            data = json.loads(clean_expr)
+            if isinstance(data, dict) and "expression" in data:
+                clean_expr = str(data["expression"]).strip(" \t\n\r\"'`")
+        except Exception:
+            import re
+            match = re.search(r"['\"]expression['\"]\s*:\s*['\"]([^'\"\}\n\r`]+)['\"]", clean_expr)
+            if match:
+                clean_expr = match.group(1).strip(" \t\n\r\"'`")
+
     if not clean_expr:
         raise ValueError("Expression is empty.")
 

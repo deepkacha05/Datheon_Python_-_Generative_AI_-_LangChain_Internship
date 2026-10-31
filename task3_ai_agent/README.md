@@ -185,3 +185,4 @@ pytest -v
 * **Action:** Tool `workspace_file_reader` detects traversal outside workspace.
 * **Final Answer:**
   > Access Denied: The requested file resolves outside the allowed workspace directory and contains sensitive environment credentials.
+

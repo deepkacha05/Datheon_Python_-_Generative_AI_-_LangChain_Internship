@@ -262,3 +262,52 @@ def test_agent_transparent_activity_log_hides_private_reasoning():
     assert "expression" in log.tool_input
     assert "100" in log.tool_output_summary
 
+
+def test_action_parser_markdown_fence_and_trailing_backticks():
+    """Verify parser handles LLMs that wrap outputs in markdown code fences or backticks."""
+    agent = AutonomousAgent(provider="mock")
+
+    # Case 1: Markdown code block enclosing Action and Action Input
+    turn1 = "```\nAction: workspace_file_reader\nAction Input: {\"filename\": \"sample_financials.txt\"}\n```"
+    t_name, t_args, _ = agent._parse_action(turn1)
+    assert t_name == "workspace_file_reader"
+    assert t_args == {"filename": "sample_financials.txt"}
+
+    # Case 2: Trailing quotes and markdown fence backticks
+    turn2 = "Action: workspace_file_reader\nAction Input: 'sample_financials.txt\"\n```"
+    t_name, t_args, _ = agent._parse_action(turn2)
+    assert t_name == "workspace_file_reader"
+    assert t_args == {"filename": "sample_financials.txt"}
+
+    # Case 3: Calculator expression wrapped in fences
+    turn3 = "Action: calculator\nAction Input: ```\n125000 + 142500\n```"
+    t_name, t_args, _ = agent._parse_action(turn3)
+    assert t_name == "calculator"
+    assert t_args == {"expression": "125000 + 142500"}
+
+
+def test_tool_argument_resilient_unwrapping():
+    """Verify tools automatically unwrap stringified JSON and trailing quotes."""
+    reader = WorkspaceFileReaderTool()
+    # 1. Reader unwraps stringified JSON with trailing fence
+    r1 = reader.run('{"filename": "sample_financials.txt"}\n```')
+    assert r1.success is True
+    assert "Gross Revenue: $150,000" in r1.output
+
+    # 2. Reader unwraps trailing quote and fence
+    r2 = reader.run('sample_financials.txt"\n```')
+    assert r2.success is True
+    assert "Gross Revenue: $150,000" in r2.output
+
+    # 3. Calculator unwraps stringified JSON with trailing fence
+    calc = CalculatorTool()
+    c1 = calc.run('{"expression": "125000 + 142500"}\n```')
+    assert c1.success is True
+    assert c1.output == "267500"
+
+    # 4. Calculator unwraps trailing quote and fence
+    c2 = calc.run('125000 + 142500"\n```')
+    assert c2.success is True
+    assert c2.output == "267500"
+
+

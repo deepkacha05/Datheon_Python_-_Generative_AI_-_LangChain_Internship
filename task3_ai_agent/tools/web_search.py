@@ -71,7 +71,19 @@ class WebSearchTool(BaseAgentTool):
         return results
 
     def run(self, query: str, max_results: int = 3) -> ToolResult:
-        clean_query = query.strip()
+        clean_query = str(query).strip(" \t\n\r\"'`")
+        if "query" in clean_query and ("{" in clean_query or ":" in clean_query):
+            try:
+                import json
+                data = json.loads(clean_query)
+                if isinstance(data, dict) and "query" in data:
+                    clean_query = str(data["query"]).strip(" \t\n\r\"'`")
+            except Exception:
+                import re
+                match = re.search(r"['\"]query['\"]\s*:\s*['\"]([^'\"\}\n\r`]+)['\"]", clean_query)
+                if match:
+                    clean_query = match.group(1).strip(" \t\n\r\"'`")
+
         if not clean_query:
             return ToolResult(
                 success=False,
