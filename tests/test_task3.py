@@ -18,7 +18,7 @@ from task3_ai_agent.agent import AgentRunResult, AutonomousAgent, ToolInvocation
 from task3_ai_agent.tools.base import ToolResult
 from task3_ai_agent.tools.calculator import CalculatorTool, safe_calculate
 from task3_ai_agent.tools.file_reader import WorkspaceFileReaderTool
-from task3_ai_agent.tools.web_search import WebSearchTool, sanitize_web_snippet
+from task3_ai_agent.tools.web_search import WebSearchTool, sanitize_web_snippet, simplify_search_query
 
 
 # =====================================================================
@@ -172,6 +172,18 @@ def test_web_snippet_sanitization():
     clean = sanitize_web_snippet(dirty_text)
     assert "[REDACTED_DIRECTIVE]" in clean
     assert "Python 3.13 was released" in clean
+
+
+def test_simplify_search_query():
+    """Verify query relaxation strips conversational stop words to yield high-intent keywords."""
+    verbose_q = "year Python was first released Guido van Rossum"
+    relaxed = simplify_search_query(verbose_q)
+    assert "Python" in relaxed
+    assert "Guido" in relaxed
+    assert "Rossum" in relaxed
+    assert "year" not in relaxed
+    assert "was" not in relaxed
+    assert "first" not in relaxed
 
 
 # =====================================================================

@@ -1,8 +1,10 @@
-"""Web Search Tool supporting Tavily API and DuckDuckGo search fallback.
+"""Web Search Tool supporting Tavily API, DuckDuckGo search, and Wikipedia fallbacks.
 
 Features:
 - Prioritizes Tavily API when TAVILY_API_KEY is configured in the environment.
 - Automatically falls back to DuckDuckGo search when Tavily key is absent or exhausted.
+- Includes rate-limit immune DuckDuckGo Instant Answer and Wikipedia REST API fallbacks.
+- Includes query relaxation to automatically extract core intent when conversational queries return 0 items.
 - Sanitizes untrusted web snippets to defend against prompt injection attacks.
 - Gracefully handles rate limits, offline states, and timeouts without crashing the agent.
 """
@@ -12,13 +14,17 @@ from __future__ import annotations
 import os
 import re
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from task3_ai_agent.tools.base import BaseAgentTool, ToolResult, WebSearchInput
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*duckduckgo_search.*")
 warnings.filterwarnings("ignore", category=UserWarning, message=".*duckduckgo_search.*")
 
 MAX_SNIPPET_LENGTH = 350
+BROWSER_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
 
 
 def sanitize_web_snippet(text: str) -> str:
@@ -34,13 +40,23 @@ def sanitize_web_snippet(text: str) -> str:
     return cleaned[:MAX_SNIPPET_LENGTH]
 
 
+def simplify_search_query(q: str) -> str:
+    """Extracts high-intent core keywords by stripping conversational stop words."""
+    stop_words = {
+        "year", "years", "was", "is", "were", "are", "first", "initial", "released",
+        "release", "when", "how", "what", "where", "who", "which", "by", "the",
+        "a", "an", "in", "on", "at", "to", "for", "of", "date", "tell", "me",
+    }
+    tokens = [w for w in re.findall(r"[A-Za-z0-9\+\#\.\-]+", q) if w.lower() not in stop_words]
+    return " ".join(tokens) if len(tokens) >= 2 else q
+
+
 class WebSearchTool(BaseAgentTool):
-    """Tool that queries the web via Tavily or DuckDuckGo search."""
+    """Resilient Web Search Tool with multi-tier fallback (Tavily, DuckDuckGo, Instant Answer, Wikipedia)."""
 
     name = "web_search"
     description = (
-        "Searches the web for up-to-date facts, statistics, recent news, or general world knowledge. "
-        "Input should be a clear search query string (e.g. 'Python latest version 2026', 'Datheon AI solutions'). "
+        "Performs a live web search to retrieve real-time facts, documentation, or historical records. "
         "Returns top search result snippets with URLs."
     )
     args_schema = WebSearchInput
@@ -85,7 +101,7 @@ class WebSearchTool(BaseAgentTool):
         import urllib.request
         q_enc = urllib.parse.quote(query)
         url = f"https://api.duckduckgo.com/?q={q_enc}&format=json&no_html=1"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
         results = []
         try:
             with urllib.request.urlopen(req, timeout=5) as resp:
@@ -117,7 +133,7 @@ class WebSearchTool(BaseAgentTool):
         import urllib.request
         q_enc = urllib.parse.quote(query)
         url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={q_enc}&format=json&srlimit={max_results}"
-        req = urllib.request.Request(url, headers={"User-Agent": "DatheonInternshipAgent/1.0 (edu; Python3.13)"})
+        req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
         results = []
         try:
             with urllib.request.urlopen(req, timeout=5) as resp:
@@ -131,7 +147,7 @@ class WebSearchTool(BaseAgentTool):
                         try:
                             t_enc = urllib.parse.quote(title.replace(" ", "_"))
                             intro_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{t_enc}"
-                            intro_req = urllib.request.Request(intro_url, headers={"User-Agent": "DatheonInternshipAgent/1.0"})
+                            intro_req = urllib.request.Request(intro_url, headers={"User-Agent": BROWSER_UA})
                             with urllib.request.urlopen(intro_req, timeout=4) as i_resp:
                                 i_data = json.loads(i_resp.read().decode())
                                 extract = i_data.get("extract", "")
@@ -147,6 +163,47 @@ class WebSearchTool(BaseAgentTool):
         except Exception:
             pass
         return results
+
+    def _execute_search_pipeline(self, target_query: str, max_results: int) -> Tuple[List[Dict[str, str]], str, Optional[Exception]]:
+        """Tries all search engines in order for a given query string."""
+        items: List[Dict[str, str]] = []
+        provider_used = "none"
+        last_error = None
+
+        # Tier 1: Tavily
+        if self.tavily_api_key and "your_tavily" not in self.tavily_api_key:
+            try:
+                items = self._search_tavily(target_query, max_results)
+                if items:
+                    return items, "tavily", None
+            except Exception as exc:
+                last_error = exc
+
+        # Tier 2: DuckDuckGo Scraper
+        try:
+            items = self._search_duckduckgo(target_query, max_results)
+            if items:
+                return items, "duckduckgo", None
+        except Exception as exc:
+            last_error = exc
+
+        # Tier 3: DuckDuckGo Instant Answer
+        try:
+            items = self._search_duckduckgo_instant(target_query, max_results)
+            if items:
+                return items, "duckduckgo_instant", None
+        except Exception as exc:
+            last_error = exc
+
+        # Tier 4: Wikipedia REST API
+        try:
+            items = self._search_wikipedia(target_query, max_results)
+            if items:
+                return items, "wikipedia", None
+        except Exception as exc:
+            last_error = exc
+
+        return items, provider_used, last_error
 
     def run(self, query: str, max_results: int = 3) -> ToolResult:
         clean_query = str(query).strip(" \t\n\r\"'`")
@@ -169,45 +226,14 @@ class WebSearchTool(BaseAgentTool):
                 error_message="Search query cannot be empty.",
             )
 
-        provider_used = "none"
-        items: List[Dict[str, str]] = []
-        last_error = None
+        # Attempt 1: Search with exact query
+        items, provider_used, last_error = self._execute_search_pipeline(clean_query, max_results)
 
-        # 1. Try Tavily if key is available
-        if self.tavily_api_key and "your_tavily" not in self.tavily_api_key:
-            try:
-                items = self._search_tavily(clean_query, max_results)
-                if items:
-                    provider_used = "tavily"
-            except Exception as exc:
-                last_error = exc
-
-        # 2. Try DuckDuckGo scraper fallback
+        # Attempt 2: If 0 results, retry with simplified core keywords
         if not items:
-            try:
-                items = self._search_duckduckgo(clean_query, max_results)
-                if items:
-                    provider_used = "duckduckgo"
-            except Exception as exc:
-                last_error = exc
-
-        # 3. Try DuckDuckGo Instant Answer REST API
-        if not items:
-            try:
-                items = self._search_duckduckgo_instant(clean_query, max_results)
-                if items:
-                    provider_used = "duckduckgo_instant"
-            except Exception as exc:
-                last_error = exc
-
-        # 4. Try Wikipedia Search REST API fallback
-        if not items:
-            try:
-                items = self._search_wikipedia(clean_query, max_results)
-                if items:
-                    provider_used = "wikipedia"
-            except Exception as exc:
-                last_error = exc
+            simplified = simplify_search_query(clean_query)
+            if simplified != clean_query:
+                items, provider_used, last_error = self._execute_search_pipeline(simplified, max_results)
 
         if not items:
             err_detail = f" ({str(last_error)})" if last_error else ""
@@ -239,4 +265,3 @@ class WebSearchTool(BaseAgentTool):
                 "result_count": len(items),
             },
         )
-

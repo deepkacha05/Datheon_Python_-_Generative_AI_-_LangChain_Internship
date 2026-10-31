@@ -23,6 +23,20 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
+import importlib
+import task3_ai_agent.tools.base
+import task3_ai_agent.tools.calculator
+import task3_ai_agent.tools.file_reader
+import task3_ai_agent.tools.web_search
+import task3_ai_agent.agent
+
+# Force fresh reload of submodules on every Streamlit script execution
+importlib.reload(task3_ai_agent.tools.base)
+importlib.reload(task3_ai_agent.tools.calculator)
+importlib.reload(task3_ai_agent.tools.file_reader)
+importlib.reload(task3_ai_agent.tools.web_search)
+importlib.reload(task3_ai_agent.agent)
+
 from task3_ai_agent.agent import AgentRunResult, AutonomousAgent, ToolInvocationRecord
 from task3_ai_agent.tools.calculator import CalculatorTool
 from task3_ai_agent.tools.file_reader import WorkspaceFileReaderTool
