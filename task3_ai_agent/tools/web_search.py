@@ -11,8 +11,12 @@ from __future__ import annotations
 
 import os
 import re
+import warnings
 from typing import Any, Dict, List, Optional
 from task3_ai_agent.tools.base import BaseAgentTool, ToolResult, WebSearchInput
+
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*duckduckgo_search.*")
+warnings.filterwarnings("ignore", category=UserWarning, message=".*duckduckgo_search.*")
 
 MAX_SNIPPET_LENGTH = 350
 
@@ -58,16 +62,77 @@ class WebSearchTool(BaseAgentTool):
         return results
 
     def _search_duckduckgo(self, query: str, max_results: int) -> List[Dict[str, str]]:
-        from duckduckgo_search import DDGS
+        import warnings
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from duckduckgo_search import DDGS
+            results = []
+            with DDGS() as ddgs:
+                raw_items = list(ddgs.text(query, max_results=max_results))
+                for item in raw_items:
+                    results.append({
+                        "title": item.get("title", ""),
+                        "snippet": sanitize_web_snippet(item.get("body", "")),
+                        "url": item.get("href", ""),
+                    })
+        return results
+
+    def _search_duckduckgo_instant(self, query: str, max_results: int = 3) -> List[Dict[str, str]]:
+        """Official DuckDuckGo Instant Answer REST API (rate-limit immune)."""
+        import json
+        import urllib.parse
+        import urllib.request
+        q_enc = urllib.parse.quote(query)
+        url = f"https://api.duckduckgo.com/?q={q_enc}&format=json&no_html=1"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
         results = []
-        with DDGS() as ddgs:
-            raw_items = list(ddgs.text(query, max_results=max_results))
-            for item in raw_items:
-                results.append({
-                    "title": item.get("title", ""),
-                    "snippet": sanitize_web_snippet(item.get("body", "")),
-                    "url": item.get("href", ""),
-                })
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode())
+                abstract = data.get("Abstract")
+                if abstract:
+                    results.append({
+                        "title": data.get("Heading") or query,
+                        "snippet": sanitize_web_snippet(abstract),
+                        "url": data.get("AbstractURL") or "https://duckduckgo.com",
+                    })
+                for topic in data.get("RelatedTopics", []):
+                    if len(results) >= max_results:
+                        break
+                    if "Text" in topic:
+                        results.append({
+                            "title": topic.get("Text", "")[:60],
+                            "snippet": sanitize_web_snippet(topic.get("Text", "")),
+                            "url": topic.get("FirstURL", ""),
+                        })
+        except Exception:
+            pass
+        return results
+
+    def _search_wikipedia(self, query: str, max_results: int = 3) -> List[Dict[str, str]]:
+        """Official Wikipedia Search REST API fallback for factual and encyclopedic inquiries."""
+        import json
+        import urllib.parse
+        import urllib.request
+        q_enc = urllib.parse.quote(query)
+        url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={q_enc}&format=json&srlimit={max_results}"
+        req = urllib.request.Request(url, headers={"User-Agent": "DatheonInternshipAgent/1.0 (edu; Python3.13)"})
+        results = []
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode())
+                for item in data.get("query", {}).get("search", []):
+                    raw_snippet = re.sub(r"<[^>]+>", "", item.get("snippet", ""))
+                    clean_snippet = sanitize_web_snippet(raw_snippet)
+                    title = item.get("title", "")
+                    results.append({
+                        "title": title,
+                        "snippet": clean_snippet,
+                        "url": f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title)}",
+                    })
+        except Exception:
+            pass
         return results
 
     def run(self, query: str, max_results: int = 3) -> ToolResult:
@@ -99,15 +164,35 @@ class WebSearchTool(BaseAgentTool):
         if self.tavily_api_key and "your_tavily" not in self.tavily_api_key:
             try:
                 items = self._search_tavily(clean_query, max_results)
-                provider_used = "tavily"
+                if items:
+                    provider_used = "tavily"
             except Exception as exc:
                 last_error = exc
 
-        # 2. Try DuckDuckGo fallback
+        # 2. Try DuckDuckGo scraper fallback
         if not items:
             try:
                 items = self._search_duckduckgo(clean_query, max_results)
-                provider_used = "duckduckgo"
+                if items:
+                    provider_used = "duckduckgo"
+            except Exception as exc:
+                last_error = exc
+
+        # 3. Try DuckDuckGo Instant Answer REST API
+        if not items:
+            try:
+                items = self._search_duckduckgo_instant(clean_query, max_results)
+                if items:
+                    provider_used = "duckduckgo_instant"
+            except Exception as exc:
+                last_error = exc
+
+        # 4. Try Wikipedia Search REST API fallback
+        if not items:
+            try:
+                items = self._search_wikipedia(clean_query, max_results)
+                if items:
+                    provider_used = "wikipedia"
             except Exception as exc:
                 last_error = exc
 
