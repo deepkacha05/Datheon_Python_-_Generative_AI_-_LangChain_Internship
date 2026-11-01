@@ -47,15 +47,19 @@ Datheon_Internship/
 │   ├── workspace/                   # Designated sandbox folder for readable documents
 │   └── README.md                    # Detailed architectural docs, security & examples
 │
-├── task4_streamlit_chatbot/         # [UPCOMING] Task 4: Interactive Full-Stack AI Chatbot with Streamlit
-│   ├── app.py
-│   └── README.md
+├── task4_chatbot/                  # [COMPLETED] Task 4: Interactive Full-Stack AI Chatbot with Streamlit
+│   ├── app.py                       # Full-stack Streamlit Chat application & CLI runner
+│   ├── memory.py                    # Conversation memory with sliding window & serialization
+│   ├── streaming.py                 # Multi-provider live token streaming engine & fallback
+│   ├── backend.py                   # Unified orchestrator (General Chat, RAG, & Agent modes)
+│   └── README.md                    # Detailed task documentation, architecture & examples
 │
-└── tests/                           # Comprehensive test suite across all tasks
+└── tests/                           # Comprehensive test suite across all 4 tasks
     ├── __init__.py
     ├── test_task1.py                # Unit & mock pipeline tests for Task 1 (16/16 passed)
     ├── test_task2.py                # Unit & mock pipeline tests for Task 2 (12/12 passed)
-    └── test_task3.py                # Unit & mock pipeline tests for Task 3 (15/15 passed)
+    ├── test_task3.py                # Unit & mock pipeline tests for Task 3 (18/18 passed)
+    └── test_task4.py                # Unit & mock pipeline tests for Task 4 (15/15 passed)
 ```
 
 ---
@@ -67,7 +71,7 @@ Datheon_Internship/
 | **Task 1** | [`task1_json_extractor`](file:///d:/Projects/Datheon_Internship/task1_json_extractor/) | Structured LLM Prompt Pipeline & JSON Extractor using Pydantic v2 & Google Gemini / OpenAI | **Completed & Verified** ✅ |
 | **Task 2** | [`task2_rag_qa`](file:///d:/Projects/Datheon_Internship/task2_rag_qa/) | Document Q&A Assistant with RAG, LangChain chunking, ChromaDB, and strict page citations | **Completed & Verified** ✅ |
 | **Task 3** | [`task3_ai_agent`](file:///d:/Projects/Datheon_Internship/task3_ai_agent/) | Multi-Tool Autonomous AI Agent with LangChain, safe AST math, and sandboxed file reader | **Completed & Verified** ✅ |
-| **Task 4** | `task4_streamlit_chatbot` | Interactive Full-Stack AI Chatbot with Streamlit, memory, and streaming | Planned ⏳ |
+| **Task 4** | [`task4_chatbot`](file:///d:/Projects/Datheon_Internship/task4_chatbot/) | Interactive Full-Stack AI Chatbot with Streamlit, sliding window memory, and live token streaming | **Completed & Verified** ✅ |
 
 ---
 
@@ -126,7 +130,16 @@ streamlit run task3_ai_agent/app.py
 python task3_ai_agent/app.py --cli
 ```
 
-### 6. Run Test Suite (All 43 Unit Tests)
+### 6. Run Task 4 (Interactive Full-Stack AI Chatbot with Streamlit)
+```bash
+# Option A: Interactive Streamlit Chatbot UI
+streamlit run task4_chatbot/app.py
+
+# Option B: Terminal CLI Mode (Demonstrates multi-turn streaming & memory)
+python task4_chatbot/app.py --cli
+```
+
+### 7. Run Complete Test Suite (All 61 Unit Tests)
 ```bash
 pytest -v
 ```
